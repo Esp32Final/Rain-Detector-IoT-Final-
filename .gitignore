@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+db.sqlite3
+staticfiles/
+.env  
+venv/
+.venv/
+.vscode/
+# Never commit your real Wi-Fi password / API key
+arduino/drying_rack/secrets.h
