@@ -1,0 +1,34 @@
+Copy This one by one 
+
+Login: create your own with  python manage.py createsuperuser
+
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py makemigrations devices
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver 0.0.0.0:8000
+
+Run
+http://127.0.0.1:8000/
+
+No New Device just start
+venv\Scripts\activate
+python manage.py runserver
+http://127.0.0.1:8000
+
+
+Check Username:
+python manage.py shell
+
+from django.contrib.auth.models import User
+print(list(User.objects.values_list("username", flat=True)))
+
+Change Username:
+python manage.py shell
+
+u = User.objects.get(username="YOURUSERNAME")
+u.username = "NewName"
+u.save()
+exit()

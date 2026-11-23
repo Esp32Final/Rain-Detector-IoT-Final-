@@ -1,0 +1,202 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Drying Rack · Control Center</title>
+<link rel="stylesheet" href="{% static 'style.css' %}"></head><body>
+
+<div class="app">
+  <header class="top">
+    <button class="menu" id="menu" aria-label="Open menu"><i data-ic="menu"></i></button>
+    <div class="logo"><i data-ic="rain"></i></div>
+    <div class="brand"><b>DRYING RACK</b><span>CONTROL CENTER</span></div>
+    <span class="pill ok" id="sysPill">System Online</span>
+    <form method="post" action="{% url 'logout' %}" class="lo">{% csrf_token %}<button type="submit" class="ghost" title="Log out"><i data-ic="logout"></i><span>Log out</span></button></form>
+  </header>
+
+  <aside class="side" id="side">
+    <div class="grp">Main menu</div>
+    <a class="nav" data-page="dashboard" href="#dashboard"><i data-ic="grid"></i>Dashboard</a>
+    <a class="nav" data-page="devices" href="#devices"><i data-ic="cpu"></i>My Devices</a>
+    <a class="nav" data-page="activity" href="#activity"><i data-ic="history"></i>Recent Activity</a>
+
+    <div class="grp sep">Connected devices</div>
+    <div id="sideDevs"></div>
+    <button class="nav addnav" id="add"><i data-ic="plus"></i>Add device</button>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <main class="main">
+    <!-- DEVICE PAGE -->
+    <section class="page" id="p-device" hidden>
+      <div class="phead">
+        <div><a class="backlink" href="#dashboard">‹ All devices</a><h1 id="dName">Device</h1><p class="sub" id="dSub"></p></div>
+        <span class="pill" id="dConn"></span>
+      </div>
+      <div class="empty" id="dEmpty" hidden>No devices yet.<br><button class="pri" id="emptyAdd">+ Add your first device</button></div>
+
+      <div id="dBody">
+
+        <div id="tab-overview">
+        <div class="card" id="coverCard">
+          <div class="chead"><h2>Cover Status</h2><span class="pill" id="dBadge"></span></div>
+          <div class="cbig"><i id="cIcon"></i><div><b id="cTitle"></b><span id="cSub">Current cover position</span></div></div>
+          <p class="why" id="dWhy"></p>
+          <div class="acts">
+            <button class="open" id="bOpen"><i data-ic="up"></i>Open Cover</button>
+            <button class="shut" id="bClose"><i data-ic="down"></i>Close Cover</button>
+          </div>
+          <p class="note" id="dNote"></p>
+        </div>
+
+        <h2 class="sec">Sensor Monitoring</h2>
+        <div class="two">
+          <div class="card sensor">
+            <div class="shead"><i data-ic="rain"></i><b>Rain Sensor</b></div>
+            <div class="big" id="rainV">—</div>
+            <span class="pill" id="rainP"></span>
+            <div class="track"><div class="fill" id="rainF"></div><div class="tick" id="rainT"></div></div>
+            <p class="note" id="rainN"></p>
+          </div>
+          <div class="card sensor">
+            <div class="shead"><i data-ic="sun"></i><b>Light Sensor</b></div>
+            <div class="big" id="lightV">—</div>
+            <span class="pill" id="lightP"></span>
+            <div class="track"><div class="fill" id="lightF"></div><div class="tick" id="lightT"></div></div>
+            <p class="note" id="lightN"></p>
+          </div>
+        </div>
+
+        <h2 class="sec">Device Information</h2>
+        <div class="card info" id="info"></div>
+        <div class="acts left"><button id="bAuto" hidden>Go back to auto mode</button></div>
+
+        <h2 class="sec">Recent Activity</h2>
+        <div class="card"><ul class="log" id="log"></ul></div>
+        </div>
+
+        <div id="tab-settings">
+          <h2 class="sec">Device Settings <span class="pill" id="sConn" style="margin-left:8px;vertical-align:middle"></span></h2>
+          <p class="sub">Click one to open it. Settings for <b id="sName"></b>.</p>
+          <div class="stiles">
+            <button class="stile" data-open="ov-wifi"><i data-ic="wifi"></i><div><b>Wi-Fi</b><small>Network name and password</small></div></button>
+            <button class="stile" data-open="ov-server"><i data-ic="globe"></i><div><b>Server URL</b><small>Where the ESP32 reports to</small></div></button>
+            <button class="stile" data-open="ov-key"><i data-ic="key"></i><div><b>Device API key</b><small>Show, copy or replace the key</small></div></button>
+            <button class="stile" data-open="ov-secrets"><i data-ic="cpu"></i><div><b>secrets.h</b><small>Copy the file for the ESP32</small></div></button>
+            <button class="stile" id="bEdit"><i data-ic="grid"></i><div><b>Edit device information</b><small>Name, location and notes</small></div></button>
+          </div>
+          <div class="acts left"><button class="dng" id="bDel">Delete device</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD (overview) -->
+    <section class="page" id="p-dashboard">
+      <div class="hero day" id="hero">
+        <div class="rainfx" id="rainfx"></div>
+        <div class="htop"><span class="when" id="oWhen"></span><span class="pill" id="oPill"></span></div>
+        <div class="hmain">
+          <div><h1 id="oTitle">Dashboard</h1><p class="hsub" id="oSub">Overview of all your devices.</p></div>
+          <div class="orbwrap"><i id="oIcon"></i></div>
+        </div>
+        <div class="hwarn" id="hWarn" hidden></div>
+      </div>
+      <div class="stats4" id="ostats"></div>
+      <h2 class="sec">Devices</h2>
+      <div class="tiles" id="tiles"></div>
+      <h2 class="sec">Recent Activity</h2>
+      <div class="card"><ul class="log" id="dashLog"></ul></div>
+    </section>
+
+    <!-- MY DEVICES -->
+    <section class="page" id="p-devices" hidden>
+      <div class="phead"><div><h1>My Devices</h1><p class="sub" id="dashSub">All your devices. Click one to open it.</p></div><button class="pri" id="add2"><i data-ic="plus"></i>Add device</button></div>
+      <input id="q" type="search" placeholder="Search by name, location or device ID" aria-label="Search devices">
+      <div id="devList"></div>
+      <section class="team" aria-labelledby="teamTitle">
+        <h2 id="teamTitle">Meet the team</h2>
+        <p class="sub">Group 1 IoT, CS2A second year. We built this automatic rain cover system for anything that needs to stay dry.</p>
+        <ul class="members">
+          <li><span class="av" style="--h:175">RR</span><div><b>Rey Brian Rosales</b><small>CS2A, second year</small></div></li>
+          <li><span class="av" style="--h:215">BF</span><div><b>Bryan Kenneth Felias</b><small>CS2A, second year</small></div></li>
+          <li><span class="av" style="--h:265">MB</span><div><b>MelchoriePet Bou</b><small>CS2A, second year</small></div></li>
+          <li><span class="av" style="--h:330">RC</span><div><b>R-Jay Custorio</b><small>CS2A, second year</small></div></li>
+          <li><span class="av" style="--h:20">RL</span><div><b>Rizza Lazaga</b><small>CS2A, second year</small></div></li>
+          <li><span class="av" style="--h:45">RS</span><div><b>Rocel Salanio</b><small>CS2A, second year</small></div></li>
+        </ul>
+      </section>
+    </section>
+
+    <!-- RECENT ACTIVITY -->
+    <section class="page" id="p-activity" hidden>
+      <div class="phead"><div><h1>Recent Activity</h1><p class="sub">Latest events from all your devices.</p></div></div>
+      <div class="card"><ul class="log tall" id="allLog"></ul></div>
+    </section>
+
+    <footer class="foot">DRYING RACK · DESKTOP CONTROL CENTER</footer>
+  </main>
+</div>
+
+<!-- add / edit device -->
+<div class="ov" id="ov"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="ttl">
+  <h2 id="ttl">Add device</h2>
+  <div class="f">
+    <div class="wide"><label for="fn">Device name *</label><input id="fn" maxlength="60" placeholder="Unit 1"></div>
+    <div><label for="fl">Location</label><input id="fl" maxlength="60" placeholder="Drying rack"></div>
+    <div><label for="fi">Device ID</label><input id="fi" maxlength="40" placeholder="ESP32-A1"></div>
+    <div class="wide"><label for="fm">Notes</label><textarea id="fm" rows="2" maxlength="200" placeholder="Optional"></textarea></div>
+    <div class="wide" id="keyrow">
+      <label for="fk">Device API key</label>
+      <div class="keybox"><input id="fk" readonly><button type="button" id="copykey">Copy</button></div>
+      <p class="hint" id="keyhint"></p>
+    </div>
+  </div>
+  <div class="err" id="err"></div>
+  <div class="row"><button id="cancel">Cancel</button><button class="pri" id="save">Save</button></div>
+</div></div>
+
+<!-- device settings dialogs -->
+<div class="ov" id="ov-wifi"><div class="dlg" role="dialog" aria-modal="true" aria-label="Wi-Fi">
+  <h2>Wi-Fi</h2>
+  <p class="sub">The network the ESP32 connects to. It must be a 2.4 GHz network.</p>
+  <div class="f">
+    <div><label for="sw">Wi-Fi name (SSID)</label><input id="sw" placeholder="Your Wi-Fi name" autocomplete="off"></div>
+    <div><label for="sp">Wi-Fi password</label><input id="sp" type="password" placeholder="Enter Wi-Fi password" autocomplete="new-password"></div>
+  </div>
+  <p class="hint">The password is never saved by the website. It only goes into the secrets.h file.</p>
+  <div class="row"><button class="closeov">Close</button><button class="pri sSave">Save Wi-Fi</button></div>
+</div></div>
+
+<div class="ov" id="ov-server"><div class="dlg" role="dialog" aria-modal="true" aria-label="Server URL">
+  <h2>Server URL</h2>
+  <p class="sub">Where the ESP32 sends its readings.</p>
+  <div class="radios">
+    <label><input type="radio" name="srv" value="local"> Local server</label>
+    <label><input type="radio" name="srv" value="pa"> PythonAnywhere</label>
+  </div>
+  <div style="margin-top:10px"><label for="su">Server URL</label><input id="su" autocomplete="off"><p class="hint" id="suHint"></p></div>
+  <div class="row"><button class="closeov">Close</button><button class="pri sSave">Save server</button></div>
+</div></div>
+
+<div class="ov" id="ov-key"><div class="dlg" role="dialog" aria-modal="true" aria-label="Device API key">
+  <h2>Device API key</h2>
+  <p class="sub">Created automatically when the device was added. Each device has its own key.</p>
+  <div class="keybox"><input id="sk" readonly><button type="button" id="skShow">Show</button><button type="button" id="skCopy">Copy</button></div>
+  <div class="row"><button class="closeov">Close</button><button type="button" id="skNew">Generate a new key</button></div>
+</div></div>
+
+<div class="ov" id="ov-secrets"><div class="dlg" role="dialog" aria-modal="true" aria-label="secrets.h">
+  <h2>secrets.h</h2>
+  <p class="sub">Optional first-time defaults for the sketch. You can also enter these on the ESP32 itself: connect your phone to its DryingRack-Setup Wi-Fi.</p>
+  <textarea id="sc" rows="8" readonly spellcheck="false"></textarea>
+  <div class="row"><button class="closeov">Close</button><button class="pri" id="scopy">Copy secrets.h</button></div>
+</div></div>
+
+<!-- confirm -->
+<div class="ov" id="cov"><div class="dlg" role="alertdialog" aria-modal="true" style="max-width:400px">
+  <h2 id="ctitle"></h2><p id="cmsg" class="sub"></p>
+  <div class="row"><button id="cno">Cancel</button><button class="pri" id="cyes"></button></div>
+</div></div>
+<div id="toast" role="status"></div>
+
+<script src="{% static 'script.js' %}"></script></body></html>

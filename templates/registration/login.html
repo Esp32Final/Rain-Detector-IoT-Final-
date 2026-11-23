@@ -1,0 +1,17 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Log in · Drying Rack</title>
+<link rel="stylesheet" href="{% static 'style.css' %}"></head><body>
+<div class="login">
+  <h1>Drying Rack</h1>
+  <p class="sub">Log in to manage your devices.</p>
+  <form method="post" class="lcard">{% csrf_token %}
+    {% if form.errors %}<div class="err">Wrong username or password.</div>{% endif %}
+    <p><label for="id_username">Username</label>{{ form.username }}</p>
+    <p><label for="id_password">Password</label>{{ form.password }}</p>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="pri" type="submit">Log in</button>
+  </form>
+</div></body></html>
